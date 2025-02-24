@@ -1,0 +1,11 @@
+[package]
+name = "gtex_analyzer"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "gtex_analyzer"
+path = "src/lib.rs"
+
+[dependencies]
+flate2 = "1.0"
