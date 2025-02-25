@@ -1,7 +1,7 @@
 use crate::TPMValue;
 use crate::{DGEResult, GCTMetadata};
 use std::collections::HashMap;
-use std::io;
+use std::io::{self, Error, ErrorKind};
 use crate::Results;
 
 #[derive(Debug)]
@@ -31,15 +31,20 @@ impl GCTResults {
 
                 // Check if the number of TPM values is equal to the number of columns of the tissues
                 if tpms.len() != metadata.num_tissues {
-                    eprintln!("Invalid number of tpm values with respect to the header, row number {}.\n Expected values: {}, found: {}.\n This row will be skipped.",
-                        index + 4, metadata.num_tissues, tpms.len());
-                    continue;
+                    return Err(Error::new(
+                        ErrorKind::InvalidInput,
+                        format!(
+                            "Invalid number of tpm values with respect to the header, row number {}.\nExpected values: {}, found: {}.\nThis row will be skipped.",
+                            index + 4, metadata.num_tissues, tpms.len()
+                        ),
+                    ));
                 }
 
                 // Check if the ID is already present
                 match results.entry(id.to_string()) {
                     std::collections::hash_map::Entry::Occupied(_) => {
-                        eprintln!("Row with ID (Name) '{}' already exists!", id);
+                        return Err(Error::new(ErrorKind::InvalidInput,
+                                format!("Row with ID (Name) '{}' already exists!", id)));
                     }
                     std::collections::hash_map::Entry::Vacant(entry) => {
                         let dge_result = entry.insert(DGEResult::new(id.to_string(), symbol.to_string()));
@@ -139,8 +144,23 @@ mod tests {
             Ok("Gene3 Symbol2 2.2 4.4 6.6".to_string()),
         ];
         let metadata = GCTMetadata::new("v1.0".to_string(), 2, 5, 3, vec!["ID".to_string(), "SYMBOL".to_string()]);
-        let partial_results = GCTResults::from_rows(input.into_iter(), &metadata, Some(3))?;
-        assert_eq!(partial_results.get_results().len(), 2); //The length should be 2 and not 3 because the second one will be skipped
+        let result = GCTResults::from_rows(input.into_iter(), &metadata, Some(3));
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("Invalid number of tpm values"));
+        Ok(())
+    }
+
+    #[test]
+    fn test_() -> Result<(), Box<dyn std::error::Error>>{
+        let input = vec![
+            Ok("Gene1 Symbol1 1.2 3.4 5.6".to_string()),
+            Ok("Gene1 Symbol1 2.2 4.4 6.6".to_string()),
+            Ok("Gene3 Symbol2 22.2 14.4 16.6".to_string()),
+        ];
+        let metadata = GCTMetadata::new("v1.0".to_string(), 2, 5, 3, vec!["ID".to_string(), "SYMBOL".to_string()]);
+        let result = GCTResults::from_rows(input.into_iter(), &metadata, Some(3));
+        assert!(result.is_err());
+        assert!(result.unwrap_err().to_string().contains("already exists"));
         Ok(())
     }
 }
