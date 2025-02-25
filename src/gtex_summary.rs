@@ -1,6 +1,6 @@
-use crate::{GCTMetadata,GCTResults};
 use std::io::{self, BufRead};
 use crate::models::{Metadata, Results};
+use crate::{GCTMetadata,GCTResults};
 
 #[derive(Debug)]
 pub struct GtexSummary<M: Metadata, R: Results<M>> {

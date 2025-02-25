@@ -2,7 +2,7 @@ use crate::TPMValue;
 use crate::{DGEResult, GCTMetadata};
 use std::collections::HashMap;
 use std::io;
-use crate::{Metadata, Results};
+use crate::Results;
 
 #[derive(Debug)]
 pub struct GCTResults {

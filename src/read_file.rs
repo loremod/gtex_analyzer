@@ -9,8 +9,7 @@ pub fn read_file<B: BufRead, M: Metadata, R: Results<M>>(
 ) -> io::Result<GtexSummary<M, R>> {
     
     if input.fill_buf()?.is_empty() {
-        eprintln!("Warning: The file is empty.");
-        return Ok(GtexSummary::new());
+        return Err(io::Error::new(io::ErrorKind::InvalidInput, "The file is empty"));
     }
 
     GtexSummary::from_reader(input, n_max)
