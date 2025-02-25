@@ -10,8 +10,8 @@ pub trait Metadata: Sized {
 }
 
 pub trait Results<M: Metadata>: Sized {
-    fn from_rows(
-        rows: &mut impl Iterator<Item = std::io::Result<String>>,
+    fn from_rows<'a>(
+        rows: &mut impl Iterator<Item = &'a str>,
         metadata: &M,
         n_max: Option<usize>
     ) -> std::io::Result<Self>;
