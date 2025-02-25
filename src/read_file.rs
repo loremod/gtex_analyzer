@@ -4,7 +4,8 @@ use crate::GtexSummary;
 
 
 pub fn read_file<B: BufRead, M: Metadata, R: Results<M>>(
-    mut input: B
+    mut input: B,
+    n_max: Option<usize>
 ) -> io::Result<GtexSummary<M, R>> {
     
     if input.fill_buf()?.is_empty() {
@@ -12,5 +13,5 @@ pub fn read_file<B: BufRead, M: Metadata, R: Results<M>>(
         return Ok(GtexSummary::new());
     }
 
-    GtexSummary::from_reader(input, None)
+    GtexSummary::from_reader(input, n_max)
 }

@@ -50,7 +50,7 @@ fn main()  -> io::Result<()>{
     // 2. Return an iterator of the file lines
     let reader = read_gct_file(decoder)?;
 
-    let summary: GtexSummary<GCTMetadata, GCTResults> = read_file(reader)?;
+    let summary: GtexSummary<GCTMetadata, GCTResults> = read_file(reader, None)?;
 
     // println!("{:#?}", summary);
     // println!("{}",summary.metadata.as_ref().unwrap().num_columns);

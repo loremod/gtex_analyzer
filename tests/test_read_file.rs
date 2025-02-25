@@ -10,7 +10,7 @@ fn test_load() -> io::Result<()> {
     let file = File::open(file_path)?;
     let reader = BufReader::new(file);
 
-    let summary: GtexSummary<GCTMetadata, GCTResults> = read_file(reader)?;
+    let summary: GtexSummary<GCTMetadata, GCTResults> = read_file(reader, None)?;
 
     assert!(summary.metadata.is_some(), "Metadata should be present");
     assert!(!summary.results.get_results().is_empty(), "Results should not be empty");
