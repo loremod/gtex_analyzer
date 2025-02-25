@@ -14,3 +14,23 @@ pub fn read_file<B: BufRead, M: Metadata, R: Results<M>>(
 
     GtexSummary::from_reader(input, n_max)
 }
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::Cursor;
+    use crate::{GCTMetadata,GCTResults};
+    
+    #[test]
+    fn test_empty_file_returns_error() {
+        let empty_input = Cursor::new(Vec::new()); // Simulates an empty file
+
+        let result: Result<GtexSummary<GCTMetadata, GCTResults>, std::io::Error> = read_file(empty_input, None);
+
+        assert!(result.is_err(), "Expected an error for an empty file.");
+        if let Err(e) = result {
+            assert!(e.to_string().contains("The file is empty"));
+        }
+    }
+}
