@@ -8,4 +8,5 @@ name = "gtex_analyzer"
 path = "src/lib.rs"
 
 [dependencies]
+anyhow = "1.0.96"
 flate2 = "1.0"
