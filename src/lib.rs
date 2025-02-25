@@ -12,3 +12,4 @@ pub use gct_results::GCTResults;
 pub use gtex_summary::GtexSummary;
 pub use dge::DGEResult;
 pub use models::{ZScoreValue, TPMValue};
+pub use models::{Metadata, Results};

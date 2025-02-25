@@ -3,6 +3,7 @@ use std::io::{self, BufRead, BufReader, Read};
 use std::path::Path;
 use flate2::read::GzDecoder; //  decompression of gz
 use gtex_analyzer::{read_file, GtexSummary};
+use gtex_analyzer::{GCTMetadata, GCTResults};
 
 // fn read_gct_gz_file<R: Read>(decoder: R) -> io::Result<impl Iterator<Item = io::Result<String>>>{
 //     let reader = io::BufReader::new(decoder);
@@ -49,7 +50,7 @@ fn main()  -> io::Result<()>{
     // 2. Return an iterator of the file lines
     let reader = read_gct_file(decoder)?;
 
-    let summary: GtexSummary = read_file(reader)?;
+    let summary: GtexSummary<GCTMetadata, GCTResults> = read_file(reader)?;
 
     // println!("{:#?}", summary);
     // println!("{}",summary.metadata.as_ref().unwrap().num_columns);

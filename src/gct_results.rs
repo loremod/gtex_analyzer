@@ -2,6 +2,7 @@ use crate::TPMValue;
 use crate::{DGEResult, GCTMetadata};
 use std::collections::HashMap;
 use std::io;
+use crate::{Metadata, Results};
 
 #[derive(Debug)]
 pub struct GCTResults {
@@ -71,6 +72,21 @@ impl GCTResults {
     /// Returns a reference to results
     pub fn get_results(&self) -> &HashMap<String, DGEResult> {
         &self.results
+    }
+}
+
+
+impl Results<GCTMetadata> for GCTResults {
+    fn from_rows(
+        rows: &mut impl Iterator<Item = io::Result<String>>,
+        metadata: &GCTMetadata,
+        n_max: Option<usize>
+    ) -> io::Result<Self> {
+        GCTResults::from_rows(rows, metadata, n_max)
+    }
+
+    fn new() -> Self {
+        GCTResults { results: std::collections::HashMap::new() }
     }
 }
 

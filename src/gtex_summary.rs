@@ -1,26 +1,27 @@
 use crate::{GCTMetadata,GCTResults};
 use std::io::{self, BufRead};
+use crate::models::{Metadata, Results};
 
 #[derive(Debug)]
-pub struct GtexSummary {
-    pub metadata: Option<GCTMetadata>,
-    pub results: GCTResults,
+pub struct GtexSummary<M: Metadata, R: Results<M>> {
+    pub metadata: Option<M>,
+    pub results: R,
     // results: HashMap<String, DGEResult>,
 }
 
-impl GtexSummary {
+impl<M: Metadata, R: Results<M>> GtexSummary<M, R>{
     pub fn new() -> Self{
         Self {
             metadata:None,
-            results: GCTResults::new(),
+            results: R::new(),
             // results: HashMap::new(),
         }
     }
 
-    pub fn from_reader<R: BufRead>(reader: R, n_max: Option<usize>) -> io::Result<Self> {
+    pub fn from_reader<B: BufRead>(reader: B, n_max: Option<usize>) -> io::Result<Self> {
         let mut lines_iter = reader.lines(); // Iterator over lines
-        let metadata = GCTMetadata::from_lines(&mut lines_iter)?;
-        let results = GCTResults::from_rows(&mut lines_iter, &metadata, n_max)?;
+        let metadata = M::from_lines(&mut lines_iter)?;
+        let results = R::from_rows(&mut lines_iter, &metadata, n_max)?;
         Ok(Self {
             metadata: Some(metadata),
             results,
@@ -38,7 +39,7 @@ mod tests {
     fn test_gtex_summary_from_reader() {
         let input_data = "v1.2\n100 2\nID SYMBOL Sample1 Sample2\nGene1 Symbol1 1.2 3.4\nGene2 Symbol2 1.2 3.4";
         let reader = Cursor::new(input_data);
-        let summary = GtexSummary::from_reader(reader, None).unwrap();
+        let summary: GtexSummary<GCTMetadata, GCTResults> = GtexSummary::from_reader(reader, None).unwrap();
 
         assert!(summary.metadata.is_some());
         let metadata = summary.metadata.as_ref().unwrap();
