@@ -2,9 +2,10 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, BufRead, BufReader, Read};
 use std::path::Path;
-use flate2::read::GzDecoder; //  decompression of gz
+use flate2::read::GzDecoder;  //  decompression of gz
+use gtex_analyzer::gtex_summary::RowParser;
 use gtex_analyzer::{read_file, GtexSummary};
-use gtex_analyzer::{GCTMetadata, GCTResults};
+use gtex_analyzer::{GCTMetadata};
 use gtex_analyzer::ZScoreValue;
 use gtex_analyzer::TPMValue;
 use gtex_analyzer::GtexSummaryLoader;
@@ -65,7 +66,7 @@ fn study_dataset(file_path: &str, n_max: Option<usize>) -> io::Result<()> {
         }
 
         if let Ok(content) = line {
-            let (id, symbol, tpms) = GCTResults::separate_id_symbol_tpm(&content)?;
+            let (id, symbol, tpms) = RowParser::separate_id_symbol_tpm(&content)?;
 
             let mean: TPMValue = tpms.iter().copied().sum::<TPMValue>() / tpms.len() as TPMValue;
             let variance: TPMValue = tpms.iter()

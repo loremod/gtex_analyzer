@@ -8,7 +8,7 @@ pub mod models;
 
 // pub use read_file::read_file;
 pub use gct_metadata::GCTMetadata;
-pub use gct_results::GCTResults;
+// pub use gct_results::GCTResults;
 pub use gtex_summary::GtexSummary;
 pub use gtex_summary::GtexSummaryLoader;
 pub use dge::DGEResult;

@@ -1,5 +1,5 @@
-use gtex_analyzer::read_file;
-use gtex_analyzer::{GtexSummary, GCTMetadata, GCTResults};
+use gtex_analyzer::{read_file, GtexSummaryLoader};
+use gtex_analyzer::{GtexSummary, GCTMetadata};
 use std::fs::File;
 use std::path::Path;
 use flate2::read::GzDecoder;
@@ -31,10 +31,13 @@ fn test_load() -> io::Result<()> {
     let file = File::open(file_path)?;
     let reader = BufReader::new(file);
 
-    let summary: GtexSummary = read_file(reader, None)?;
+    let summary_loader = GtexSummaryLoader::new(Some(10),  None);
+    let summary = summary_loader.load_summary(reader)?;
 
-    assert!(summary.metadata.is_some(), "Metadata should be present");
-    assert!(!summary.results.get_results().is_empty(), "Results should not be empty");
+    // println!("{:#?}", summary.get_results());
+
+    // assert!(summary.metadata.is_some(), "Metadata should be present");
+    assert!(!summary.get_results().is_empty(), "Results should not be empty");
 
     Ok(())
 }
@@ -50,15 +53,16 @@ fn test_on_sample_dataset() -> io::Result<()>{
     // 2. Return an iterator of the file lines
     let reader = read_gct_file(decoder)?;
 
-    let summary_wrap = read_file(reader, None);
+    let summary_loader = GtexSummaryLoader::new(Some(10),  None);
+    let summary = summary_loader.load_summary(reader)?;
 
-    assert!(!summary_wrap.is_err(), "Expected an Ok(GtexSummary), not an Err");
-    let summary = summary_wrap?;
-    assert!(!summary.metadata.is_none(), "Expected GtexSummary to contain GCTMetadata, not None");
+
+
+    // assert!(!summary.metadata.is_none(), "Expected GtexSummary to contain GCTMetadata, not None");
     assert!(summary.metadata.num_tissues > 0);
     assert_eq!(summary.metadata.num_columns, summary.metadata.num_tissues + 2);
-    assert_eq!(summary.metadata.column_names.len(), summary.metadata.num_tissues);
-    assert!(!summary.results.get_results().is_empty(), "Expected GtexSummary to contain GCTResults with a populated HashMap, not empty");
+    assert_eq!(summary.metadata.column_names.len(), summary.metadata.num_columns);
+    assert!(!summary.get_results().is_empty(), "Expected GtexSummary to contain GCTResults with a populated HashMap, not empty");
 
     //Add more specifict assertions
     Ok(())
