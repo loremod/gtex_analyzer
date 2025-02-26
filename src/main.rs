@@ -7,6 +7,7 @@ use gtex_analyzer::{read_file, GtexSummary};
 use gtex_analyzer::{GCTMetadata, GCTResults};
 use gtex_analyzer::ZScoreValue;
 use gtex_analyzer::TPMValue;
+use gtex_analyzer::GtexSummaryLoader;
 
 
 // fn read_gct_gz_file<R: Read>(decoder: R) -> io::Result<impl Iterator<Item = io::Result<String>>>{
@@ -103,13 +104,11 @@ fn main()  -> io::Result<()>{
     // 2. Return an iterator of the file lines
     let reader = read_gct_file(decoder)?;
 
-    let summary: GtexSummary = read_file(reader, None)?;
+    let summary_loader = GtexSummaryLoader::new(Some(10),  None);
+    let summary = summary_loader.load_summary(reader)?;
 
-    println!("{:#?}", summary.results);
+    println!("{:#?}", summary.get_results());
     
-
-
-
 
 
     // println!("{:#?}", summary);

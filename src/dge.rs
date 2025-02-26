@@ -24,7 +24,6 @@ impl DGEResult{
                 down_regulated: Vec::new(),
             }
     }
-
     pub fn add_up_regulated(&mut self, tissue_name: String, z_score:ZScoreValue){
         self.up_regulated.push(TissueAnalysis{tissue_name: tissue_name, z_score: z_score});
     }
@@ -51,5 +50,13 @@ impl DGEResult{
                 self.add_down_regulated(tissue.clone(), zscore); 
             }
         }
+
     }
+
+    pub fn from_analysis(id: String, symbol: String, tpms: &[TPMValue], metadata: &GCTMetadata) -> Self{
+        let mut dgeresult = Self::new(id.to_string(), symbol.to_string());
+        dgeresult.perform_analysis(&tpms, metadata);
+        dgeresult
+    }
+
 }

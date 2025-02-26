@@ -42,7 +42,7 @@ fn test_load() -> io::Result<()> {
 
 #[test]
 fn test_on_sample_dataset() -> io::Result<()>{
-    let file_path: &str = "../../../data/GTEx_RNASeq_gene_median_tpm_HEAD.gct"; // bulk Tissue Expression
+    let file_path: &str = "data/GTEx_RNASeq_gene_median_tpm_HEAD.gct"; // bulk Tissue Expression
 
     // let file_path: &str  = "../../../data/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_median_tpm.gct.gz";
     // 1. Decode gz file
@@ -53,10 +53,13 @@ fn test_on_sample_dataset() -> io::Result<()>{
     let summary_wrap = read_file(reader, None);
 
     assert!(!summary_wrap.is_err(), "Expected an Ok(GtexSummary), not an Err");
-
     let summary = summary_wrap?;
     assert!(!summary.metadata.is_none(), "Expected GtexSummary to contain GCTMetadata, not None");
+    assert!(summary.metadata.num_tissues > 0);
+    assert_eq!(summary.metadata.num_columns, summary.metadata.num_tissues + 2);
+    assert_eq!(summary.metadata.column_names.len(), summary.metadata.num_tissues);
     assert!(!summary.results.get_results().is_empty(), "Expected GtexSummary to contain GCTResults with a populated HashMap, not empty");
-    println!("{:#?}", summary.results);
+
+    //Add more specifict assertions
     Ok(())
 }

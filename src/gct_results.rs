@@ -6,7 +6,7 @@ use std::io::{self, Error, ErrorKind};
 
 #[derive(Debug)]
 pub struct GCTResults {
-    results: HashMap<String, DGEResult>,
+    pub results: HashMap<String, DGEResult>,
 }
 
 impl GCTResults {
