@@ -1,32 +1,32 @@
-use crate::models::{Metadata, Results};
+// use crate::models::{Metadata, Results};
 use crate::{DGEResult, GCTMetadata, GCTResults};
 use std::io::{self, BufRead};
 
 #[derive(Debug)]
-pub struct GtexSummary<M: Metadata, R: Results<M>> {
-    pub metadata: Option<M>,
-    pub results: R,
+pub struct GtexSummary{
+    pub metadata: Option<GCTMetadata>,
+    pub results: GCTResults,
     // results: HashMap<String, DGEResult>,
 }
 
-impl<M: Metadata, R: Results<M>> GtexSummary<M, R> {
+impl GtexSummary {
     pub fn new() -> Self {
         Self {
             metadata: None,
-            results: R::new(),
+            results: GCTResults::new(),
             // results: HashMap::new(),
         }
     }
 
     pub fn from_reader<B: BufRead>(reader: B, n_max: Option<usize>) -> io::Result<Self> {
         let mut lines_iter = reader.lines(); // Iterator over lines
-        let metadata = M::from_lines(&mut lines_iter)?;
+        let metadata = GCTMetadata::from_lines(&mut lines_iter)?;
 
         let data: Vec<_> = lines_iter
             .map(|x| x.expect("There should be no I/O-related issues during reading the file"))
             .collect();
 
-        let results = R::from_rows(&mut data.iter().map(|x| x.as_str()), &metadata, n_max)?;
+        let results = GCTResults::from_rows(&mut data.iter().map(|x| x.as_str()), &metadata, n_max)?;
         Ok(Self {
             metadata: Some(metadata),
             results,
@@ -36,13 +36,12 @@ impl<M: Metadata, R: Results<M>> GtexSummary<M, R> {
 
 pub struct GtexSummaryLoader {
     n_max: Option<usize>,
+    dge_threshold: Option<usize>
 }
 
 impl GtexSummaryLoader {
-    pub fn load_summary<M, R, B>(&self, data: B) -> anyhow::Result<GtexSummary<M, R>>
+    pub fn load_summary<B>(&self, data: B) -> anyhow::Result<GtexSummary>
     where
-        M: Metadata,
-        R: Results<M>,
         B: BufRead,
     {
         // (1) parse the metadata to get the number of columns
@@ -88,7 +87,7 @@ mod tests {
         let input_data =
             "v1.2\n100 2\nID SYMBOL Sample1 Sample2\nGene1 Symbol1 1.2 3.4\nGene2 Symbol2 1.2 3.4";
         let reader = Cursor::new(input_data);
-        let summary: GtexSummary<GCTMetadata, GCTResults> =
+        let summary: GtexSummary =
             GtexSummary::from_reader(reader, None).unwrap();
 
         assert!(summary.metadata.is_some());

@@ -1,5 +1,5 @@
 use std::io;
-use crate::Metadata;
+// use crate::Metadata;
 
 #[derive(Debug)]
 pub struct GCTMetadata {
@@ -58,11 +58,11 @@ impl GCTMetadata {
     }
 }
 
-impl Metadata for GCTMetadata {
-    fn from_lines(lines: &mut impl Iterator<Item = io::Result<String>>) -> io::Result<Self> {
-        GCTMetadata::from_lines(lines)
-    }
-}
+// impl Metadata for GCTMetadata {
+//     fn from_lines(lines: &mut impl Iterator<Item = io::Result<String>>) -> io::Result<Self> {
+//         GCTMetadata::from_lines(lines)
+//     }
+// }
 
 
 #[cfg(test)]
