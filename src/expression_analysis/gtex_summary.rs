@@ -29,7 +29,7 @@ impl GtexSummaryLoader {
     pub fn new(n_max: Option<usize>, dge_threshold: Option<ZScoreValue>) -> Self {
         Self {
             n_max,
-            dge_threshold,
+            dge_threshold: dge_threshold.map(|z| z.abs()), //To make sure it is not negative
         }
     }
 

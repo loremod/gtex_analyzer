@@ -13,7 +13,7 @@ pub struct DGEResult {
 #[derive(Debug)]
 pub struct TissueAnalysis {
     pub tissue_name: String,
-    pub z_score: ZScoreValue, // maybe I'm exaggerating with the type dimension, to do: ask the Professor
+    pub z_score: ZScoreValue, 
 }
 
 impl DGEResult {
@@ -57,7 +57,7 @@ impl DGEResult {
             let zscore = (tpm_value - mean) / sd;
             if zscore >= dge_threshold {
                 self.add_up_regulated(tissue.clone(), zscore);
-            } else if zscore <= -2.0 {
+            } else if zscore <= -dge_threshold {
                 self.add_down_regulated(tissue.clone(), zscore);
             }
         }
