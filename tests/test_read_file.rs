@@ -1,9 +1,8 @@
-use gtex_analyzer::{read_file, GtexSummaryLoader};
-use gtex_analyzer::{GtexSummary, GCTMetadata};
-use std::fs::File;
-use std::path::Path;
 use flate2::read::GzDecoder;
-use std::io::{self, BufRead, BufReader, Read};
+use gtex_analyzer::expression_analysis::GtexSummaryLoader;
+use std::fs::File;
+use std::io::{self, BufRead, BufReader, Cursor, Read};
+use std::path::Path;
 
 fn decode_file(file_path: &str) -> io::Result<Box<dyn BufRead>> {
     let path = Path::new(file_path);
@@ -18,33 +17,47 @@ fn decode_file(file_path: &str) -> io::Result<Box<dyn BufRead>> {
     }
 }
 
-fn read_gct_file<R: Read>(decoder: R) -> io::Result<BufReader<R>>{
+fn read_gct_file<R: Read>(decoder: R) -> io::Result<BufReader<R>> {
     let reader = io::BufReader::new(decoder);
     Ok(reader)
 }
 
+#[test]
+fn test_empty_file_returns_error() {
+    let empty_input = Cursor::new(Vec::new()); // Simulates an empty file
+
+    let summary_loader = GtexSummaryLoader::new(Some(10), None);
+    let summary_wrapped = summary_loader.load_summary(empty_input);
+
+    assert!(
+        summary_wrapped.is_err(),
+        "Expected an error for an empty file."
+    );
+}
 
 #[test]
 fn test_load() -> io::Result<()> {
-    let file_path: &str = "data/GTEx_RNASeq_gene_median_tpm_HEAD.gct"; 
+    let file_path: &str = "data/GTEx_RNASeq_gene_median_tpm_HEAD.gct";
 
     let file = File::open(file_path)?;
     let reader = BufReader::new(file);
 
-    let summary_loader = GtexSummaryLoader::new(Some(10),  None);
+    let summary_loader = GtexSummaryLoader::new(Some(10), None);
     let summary = summary_loader.load_summary(reader)?;
 
     // println!("{:#?}", summary.get_results());
 
     // assert!(summary.metadata.is_some(), "Metadata should be present");
-    assert!(!summary.get_results().is_empty(), "Results should not be empty");
+    assert!(
+        !summary.get_results().is_empty(),
+        "Results should not be empty"
+    );
 
     Ok(())
 }
 
-
 #[test]
-fn test_on_sample_dataset() -> io::Result<()>{
+fn test_on_sample_dataset() -> io::Result<()> {
     let file_path: &str = "data/GTEx_RNASeq_gene_median_tpm_HEAD.gct"; // bulk Tissue Expression
 
     // let file_path: &str  = "../../../data/GTEx_Analysis_v10_RNASeQCv2.4.2_gene_median_tpm.gct.gz";
@@ -53,16 +66,23 @@ fn test_on_sample_dataset() -> io::Result<()>{
     // 2. Return an iterator of the file lines
     let reader = read_gct_file(decoder)?;
 
-    let summary_loader = GtexSummaryLoader::new(Some(10),  None);
+    let summary_loader = GtexSummaryLoader::new(Some(10), None);
     let summary = summary_loader.load_summary(reader)?;
-
-
 
     // assert!(!summary.metadata.is_none(), "Expected GtexSummary to contain GCTMetadata, not None");
     assert!(summary.metadata.num_tissues > 0);
-    assert_eq!(summary.metadata.num_columns, summary.metadata.num_tissues + 2);
-    assert_eq!(summary.metadata.column_names.len(), summary.metadata.num_columns);
-    assert!(!summary.get_results().is_empty(), "Expected GtexSummary to contain GCTResults with a populated HashMap, not empty");
+    assert_eq!(
+        summary.metadata.num_columns,
+        summary.metadata.num_tissues + 2
+    );
+    assert_eq!(
+        summary.metadata.column_names.len(),
+        summary.metadata.num_columns
+    );
+    assert!(
+        !summary.get_results().is_empty(),
+        "Expected GtexSummary to contain GCTResults with a populated HashMap, not empty"
+    );
 
     //Add more specifict assertions
     Ok(())
