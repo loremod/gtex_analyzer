@@ -4,6 +4,10 @@ use crate::expression_analysis::{DGEResult, GCTMetadata, ZScoreValue};
 use std::collections::HashMap;
 use std::io::{self, BufRead, Error, ErrorKind};
 
+/// Represents a summary of GTEx gene expression data analysis, including metadata and processed results.
+///
+/// `GtexSummary` stores metadata about the dataset (`GCTMetadata`), which is a file in GCT format, and
+/// a collection of differentially expressed genes (`DGEResult`).
 #[derive(Debug)]
 pub struct GtexSummary {
     pub metadata: GCTMetadata,
@@ -15,11 +19,45 @@ impl GtexSummary {
         Self { metadata, results }
     }
 
+    /// Returns a reference to the differential expression results.
+    ///
+    /// # Returns
+    /// A reference to a `HashMap` containing gene IDs as keys
+    /// and `DGEResult` objects as values.
     pub fn get_results(&self) -> &HashMap<String, DGEResult> {
         &self.results
     }
 }
 
+/// A loader for processing GTEx gene expression datasets
+///
+/// `GtexSummaryLoader` manages parameters such as the maximum number
+/// of rows to process, where each line is a gene,  and the threshold to classify a gene as differential expressed.
+///
+/// It handles the loading and processing of gene expression
+/// data and it stores it in a `GtexSummary` object.
+///
+/// # Examples
+/// ```
+/// use std::io::Cursor;
+/// use gtex_analyzer::expression_analysis::GtexSummaryLoader;
+/// 
+///  let input = vec![
+/// "v1.0\n3 3\n ID SYMBOL T1 T2 T3".to_string(),
+/// "Gene1 Symbol1 1.2 3.4 5.6".to_string(),
+/// "Gene2 Symbol2 2.2 4.4 6.6".to_string(),
+/// "Gene3 Symbol2 2.2 4.4 6.6".to_string(),
+/// ];
+///
+/// let input_data = input.join("\n");
+/// let cursor = Cursor::new(input_data.into_bytes());
+///
+/// let summary_loader = GtexSummaryLoader::new(None, Some(1.2));
+/// let risultati = summary_loader.load_summary(cursor);
+///
+/// assert!(!risultati.is_err(), "It should not return an Err");
+/// assert_eq!(risultati.unwrap().get_results().len(), 3);
+/// ```
 pub struct GtexSummaryLoader {
     n_max: Option<usize>,
     dge_threshold: Option<ZScoreValue>,
@@ -33,6 +71,14 @@ impl GtexSummaryLoader {
         }
     }
 
+    /// `GtexSummaryLoader` method that performs the analysis on the gene expression data and
+    /// returns a `GtexSummary` object with the results.
+    ///
+    /// # Arguments
+    /// It takes in input a object that implements BufRead
+    ///
+    /// # Returns
+    /// A new instance of `GtexSummary`.
     pub fn load_summary<B>(&self, data: B) -> io::Result<GtexSummary>
     where
         B: BufRead,

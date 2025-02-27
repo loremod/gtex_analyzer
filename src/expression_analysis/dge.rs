@@ -2,6 +2,9 @@ use crate::expression_analysis::GCTMetadata;
 use crate::expression_analysis::TPMValue;
 use crate::expression_analysis::ZScoreValue;
 
+/// Stores statistical information about the gene's differential expression across tissues.
+/// 
+/// It stores the Gene ID, the Gene symbol and a Vector of up_regulated and down_regulated tissues
 #[derive(Debug)]
 pub struct DGEResult {
     pub id: String,                          // referred to as Name
@@ -13,7 +16,8 @@ pub struct DGEResult {
 #[derive(Debug)]
 pub struct TissueAnalysis {
     pub tissue_name: String,
-    pub z_score: ZScoreValue, 
+    /// Z-scores for expression levels in the specific tissues with respect to all tissues.
+    pub z_score: ZScoreValue,
 }
 
 impl DGEResult {
@@ -39,6 +43,7 @@ impl DGEResult {
         });
     }
 
+    /// It compute differentially expressed genes based on Z-scores.
     pub fn perform_analysis(
         &mut self,
         tpms: &[TPMValue],

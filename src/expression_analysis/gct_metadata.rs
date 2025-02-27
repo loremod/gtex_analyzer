@@ -1,14 +1,25 @@
 use std::io;
-// use crate::Metadata;
 
+/// Stores metadata information about a GTEx dataset.
+///
+/// Includes dataset version, sample counts, and column headers.
 #[derive(Debug)]
 pub struct GCTMetadata {
+    /// Version of the GCT format used in the file.
     pub version: String,
+
+    /// Number of genes (rows).
     pub num_rows: usize,
+
     pub num_columns: usize,
+
+    /// Number of tissues excluding ID/Symbol columns.
     pub num_tissues: usize,
+
+    /// Names of all columns, including sample IDs.
     pub column_names: Vec<String>,
 }
+
 
 impl GCTMetadata {
     pub fn new(
@@ -27,10 +38,12 @@ impl GCTMetadata {
         }
     }
 
+    /// Returns the names of all the tissues, which are all the columns excluding ID/Symbol columns.
     pub fn get_tissue_names(&self) -> &[String] {
         &self.column_names[2..]
     }
 
+    /// Generate a io::Result<GCTMetadata> from the file lines iterator and returns it.
     pub fn from_lines(
         mut lines: impl Iterator<Item = io::Result<String>>,
     ) -> io::Result<GCTMetadata> {
