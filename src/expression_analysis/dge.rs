@@ -1,9 +1,9 @@
-use crate::expression_analysis::GCTMetadata;
-use crate::expression_analysis::TPMValue;
-use crate::expression_analysis::ZScoreValue;
+use super::GCTMetadata;
+use super::TPMValue;
+use super::ZScoreValue;
 
 /// Stores statistical information about the gene's differential expression across tissues.
-/// 
+///
 /// It stores the Gene ID, the Gene symbol and a Vector of up_regulated and down_regulated tissues
 #[derive(Debug)]
 pub struct DGEResult {

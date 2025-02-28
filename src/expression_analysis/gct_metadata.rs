@@ -20,7 +20,6 @@ pub struct GCTMetadata {
     pub column_names: Vec<String>,
 }
 
-
 impl GCTMetadata {
     pub fn new(
         version: String,

@@ -1,5 +1,4 @@
 use flate2::read::GzDecoder; //  decompression of gz
-use gtex_analyzer::expression_analysis::gtex_summary::RowParser;
 use gtex_analyzer::expression_analysis::GCTMetadata;
 use gtex_analyzer::expression_analysis::GtexSummaryLoader;
 use gtex_analyzer::expression_analysis::TPMValue;
@@ -25,6 +24,26 @@ fn read_gct_file<R: Read>(decoder: R) -> io::Result<BufReader<R>> {
     let reader = io::BufReader::new(decoder);
     Ok(reader)
 }
+
+pub fn separate_id_symbol_tpm(content: &str) -> io::Result<(&str, &str, Box<[TPMValue]>)> {
+    let elems: Vec<&str> = content.split_whitespace().collect();
+    let id: &str = elems[0];
+    let symbol: &str = elems[1];
+    let tpms: Box<[TPMValue]> = elems[2..]
+        .iter()
+        .map(|elem| {
+            elem.parse::<TPMValue>().map_err(|_| {
+                io::Error::new(
+                    io::ErrorKind::InvalidData,
+                    format!("Invalid TPM value for gene ID {}: '{}'", id, elem),
+                )
+            })
+        })
+        .collect::<Result<Vec<TPMValue>, io::Error>>()?
+        .into_boxed_slice();
+    Ok((id, symbol, tpms))
+}
+
 fn study_dataset(file_path: &str, n_max: Option<usize>) -> io::Result<()> {
     let decoder = decode_file(file_path)?;
 
@@ -43,7 +62,7 @@ fn study_dataset(file_path: &str, n_max: Option<usize>) -> io::Result<()> {
         }
 
         if let Ok(content) = line {
-            let (id, symbol, tpms) = RowParser::separate_id_symbol_tpm(&content)?;
+            let (id, symbol, tpms) = separate_id_symbol_tpm(&content)?;
 
             let mean: TPMValue = tpms.iter().copied().sum::<TPMValue>() / tpms.len() as TPMValue;
             let variance: TPMValue =
@@ -83,8 +102,5 @@ fn main() -> io::Result<()> {
 
     println!("{:#?}", summary.get_results());
 
-    // println!("{:#?}", summary);
-    // println!("{}",summary.metadata.as_ref().unwrap().num_columns);
-    // println!(summary.metadata.);
     Ok(())
 }

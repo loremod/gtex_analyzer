@@ -1,6 +1,6 @@
 // use crate::models::{Metadata, Results};
-use crate::expression_analysis::TPMValue;
-use crate::expression_analysis::{DGEResult, GCTMetadata, ZScoreValue};
+use super::TPMValue;
+use super::{DGEResult, GCTMetadata, ZScoreValue};
 use std::collections::HashMap;
 use std::io::{self, BufRead, Error, ErrorKind};
 
@@ -41,7 +41,7 @@ impl GtexSummary {
 /// ```
 /// use std::io::Cursor;
 /// use gtex_analyzer::expression_analysis::GtexSummaryLoader;
-/// 
+///
 ///  let input = vec![
 /// "v1.0\n3 3\n ID SYMBOL T1 T2 T3".to_string(),
 /// "Gene1 Symbol1 1.2 3.4 5.6".to_string(),
