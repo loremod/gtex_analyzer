@@ -1,11 +1,12 @@
 use super::GCTMetadata;
 use super::TPMValue;
 use super::ZScoreValue;
+use serde::{Serialize, Deserialize};
 
 /// Stores statistical information about the gene's differential expression across tissues.
 ///
 /// It stores the Gene ID, the Gene symbol and a Vector of up_regulated and down_regulated tissues
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct DGEResult {
     pub id: String,                          // referred to as Name
     pub symbol: String,                      // referred to as Description
@@ -13,7 +14,7 @@ pub struct DGEResult {
     pub down_regulated: Vec<TissueAnalysis>, // pair<TissueName, ZScoreValue>
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TissueAnalysis {
     pub tissue_name: String,
     /// Z-scores for expression levels in the specific tissues with respect to all tissues.

@@ -3,12 +3,16 @@ use super::TPMValue;
 use super::{DGEResult, GCTMetadata, ZScoreValue};
 use std::collections::HashMap;
 use std::io::{self, BufRead, Error, ErrorKind};
+use serde::{Serialize, Deserialize};
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
+use std::path::Path;
 
 /// Represents a summary of GTEx gene expression data analysis, including metadata and processed results.
 ///
 /// `GtexSummary` stores metadata about the dataset (`GCTMetadata`), which is a file in GCT format, and
 /// a collection of differentially expressed genes (`DGEResult`).
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct GtexSummary {
     pub metadata: GCTMetadata,
     results: HashMap<String, DGEResult>,
@@ -28,6 +32,46 @@ impl GtexSummary {
         &self.results
     }
 }
+
+impl GtexSummary {
+
+    /// Save this `GtexSummary` to disk in a compact binary format using `bincode`.
+    /// This is the fastest option for caching and reloading later.
+    pub fn save_bincode<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
+        let file = File::create(path)?;
+        let writer = BufWriter::new(file);
+        bincode::serialize_into(writer, self)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+    }
+
+    /// Load a `GtexSummary` from a `.bincode` file previously saved with `save_bincode`.
+    pub fn load_bincode<P: AsRef<Path>>(path: P) -> std::io::Result<Self> {
+        let file = File::open(path)?;
+        let reader = BufReader::new(file);
+        bincode::deserialize_from(reader)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+    }
+
+    /// Save this `GtexSummary` to disk in human-readable JSON format.
+    /// This is slower and larger than bincode but human readable.
+    pub fn save_json<P: AsRef<Path>>(&self, path: P) -> std::io::Result<()> {
+        let file = File::create(path)?;
+        let writer = BufWriter::new(file);
+        serde_json::to_writer_pretty(writer, self)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+    }
+
+    /// Load a `GtexSummary` from a `.json` file previously saved with `save_json`.
+    pub fn load_json<P: AsRef<Path>>(path: P) -> std::io::Result<Self> {
+        let file = File::open(path)?;
+        let reader = BufReader::new(file);
+        serde_json::from_reader(reader)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e))
+    }
+}
+
+
+
 
 /// A loader for processing GTEx gene expression datasets
 ///

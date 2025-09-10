@@ -1,9 +1,10 @@
 use std::io;
+use serde::{Serialize, Deserialize};
 
 /// Stores metadata information about a GTEx dataset.
 ///
 /// Includes dataset version, sample counts, and column headers.
-#[derive(Debug)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct GCTMetadata {
     /// Version of the GCT format used in the file.
     pub version: String,
